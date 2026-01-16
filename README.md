@@ -29,7 +29,7 @@ A modern, responsive task management application built with React and Bootstrap.
 
 1. **Clone the repository**
 ```bash
-   git clone <your-repo-url>
+   git clone https://github.com/Ali-Haidar-159/task-manager-react-w3.git
    cd task-manager
 ```
 
