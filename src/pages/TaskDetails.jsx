@@ -4,6 +4,7 @@ import { ThemeContext } from '../context/ThemeContext';
 import useFetch from '../hooks/useFetch';
 import Loader from '../components/Loader';
 import ErrorMessage from '../components/ErrorMessage';
+import { updateTaskStatus } from '../utils/storage';
 
 const TaskDetails = () => {
   const { theme } = useContext(ThemeContext);
@@ -13,8 +14,9 @@ const TaskDetails = () => {
   // Local state to manage task completion
   const [isCompleted, setIsCompleted] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [taskData, setTaskData] = useState(null);
   
-  // Fetch single task
+  // Fetch single task with local storage
   const { data: task, loading, error } = useFetch(
     `https://jsonplaceholder.typicode.com/todos/${id}`
   );
@@ -22,6 +24,7 @@ const TaskDetails = () => {
   // Update local state when task data is loaded
   useEffect(() => {
     if (task) {
+      setTaskData(task);
       setIsCompleted(task.completed);
     }
   }, [task]);
@@ -31,6 +34,13 @@ const TaskDetails = () => {
     setIsCompleted(true);
     setShowSuccessMessage(true);
     
+    // Update task in localStorage using utility function
+    const updatedTask = updateTaskStatus(id, true);
+    if (updatedTask) {
+      setTaskData(updatedTask);
+    }
+    
+    // Hide success message after 10 seconds
     setTimeout(() => {
       setShowSuccessMessage(false);
     }, 10000);
@@ -39,11 +49,18 @@ const TaskDetails = () => {
   // Handle mark as pending
   const handleMarkAsPending = () => {
     setIsCompleted(false);
-    setShowSuccessMessage(false);
+    
+    // Update task in localStorage using utility function
+    const updatedTask = updateTaskStatus(id, false);
+    if (updatedTask) {
+      setTaskData(updatedTask);
+    }
   };
   
   if (loading) return <Loader />;
   if (error) return <ErrorMessage message={error} />;
+  
+  const displayTask = taskData || task;
   
   return (
     <div className={`container mt-4 pb-5 ${theme === 'dark' ? 'text-white' : 'text-dark'}`}>
@@ -57,7 +74,7 @@ const TaskDetails = () => {
       {/* Success Message */}
       {showSuccessMessage && (
         <div className="alert alert-success alert-dismissible fade show" role="alert">
-          <strong>🎉 Success!</strong> Task has been marked as completed.
+          <strong>🎉 Success!</strong> Task has been marked as completed and saved to local storage.
           <button 
             type="button" 
             className="btn-close" 
@@ -93,7 +110,7 @@ const TaskDetails = () => {
                       Task ID
                     </strong>
                     <p className={`h4 mb-0 ${theme === 'dark' ? 'text-white' : ''}`}>
-                      #{task?.id}
+                      #{displayTask?.id}
                     </p>
                   </div>
                 </div>
@@ -104,7 +121,7 @@ const TaskDetails = () => {
                       User ID
                     </strong>
                     <p className={`h4 mb-0 ${theme === 'dark' ? 'text-white' : ''}`}>
-                      #{task?.userId}
+                      #{displayTask?.userId}
                     </p>
                   </div>
                 </div>
@@ -115,7 +132,7 @@ const TaskDetails = () => {
                   Title
                 </strong>
                 <p className={`h5 ${theme === 'dark' ? 'text-white' : ''}`}>
-                  {task?.title}
+                  {displayTask?.title}
                 </p>
               </div>
               
@@ -129,7 +146,7 @@ const TaskDetails = () => {
                       <span className="fs-3 me-3">✓</span>
                       <div className="flex-grow-1">
                         <h5 className="mb-0">Completed</h5>
-                        <p className="mb-0 small">This task has been marked as done.</p>
+                        <p className="mb-0 small">This task has been marked as done and saved to localStorage.</p>
                       </div>
                     </div>
                   ) : (
