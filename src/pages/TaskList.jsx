@@ -9,19 +9,38 @@ const TaskList = () => {
   const { theme } = useContext(ThemeContext);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [filterStatus, setFilterStatus] = useState('all'); //********** */
   const tasksPerPage = 20;
   
   // Fetch tasks using custom hook
   const { data: tasks, loading, error } = useFetch(
     'https://jsonplaceholder.typicode.com/todos?_limit=200'
   );
-  
-  // Filter tasks based on search term
+
+
+
+  //********** */
+// Filter tasks based on search term and status
   const filteredTasks = tasks 
-    ? tasks.filter(task => 
-        task.title.toLowerCase().includes(searchTerm.toLowerCase())
-      )
+    ? tasks.filter(task => {
+        const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesStatus = filterStatus === 'all' 
+          ? true 
+          : filterStatus === 'completed' 
+            ? task.completed 
+            : !task.completed;
+        return matchesSearch && matchesStatus;
+      })
     : [];
+  
+  // Calculate statistics
+  const totalTasks = tasks?.length || 0;
+  const completedTasks = tasks?.filter(t => t.completed).length || 0;
+  const pendingTasks = totalTasks - completedTasks;
+  const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+  //********** */
+
+  
   
   // Pagination calculations
   const indexOfLastTask = currentPage * tasksPerPage;
@@ -38,7 +57,7 @@ const TaskList = () => {
   // Handle search
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
-    setCurrentPage(1); // Reset to first page
+    setCurrentPage(1);
   };
   
   if (loading) return <Loader />;
@@ -106,7 +125,7 @@ const TaskList = () => {
                 <div className="card-body d-flex flex-column">
                   <div className="d-flex justify-content-between align-items-start mb-3">
                     <h6 className={`mb-0 ${theme === 'dark' ? 'text-white' : 'text-muted'}`}>
-                      Task #{task.id}
+                      Task - {task.id}
                     </h6>
                     {task.completed && (
                       <span className="badge bg-success">✓ Done</span>
