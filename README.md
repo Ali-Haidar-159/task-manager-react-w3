@@ -25,6 +25,20 @@ A modern, responsive task management application built with React and Bootstrap.
 - **Component Reusability** - Modular, reusable components
 
 
+## Screenshots
+
+![Home Page](./screenshots/home_page.png)
+
+![404 Page](./screenshots/404.png)
+
+![Task List](./screenshots/task_list.png)
+
+![Specific Task](./screenshots/specific_task.png)
+
+![Dark Mode](./screenshots/darkmode.png)
+
+
+
 ### Installation
 
 1. **Clone the repository**
